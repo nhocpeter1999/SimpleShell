@@ -158,6 +158,5 @@ int main()
 	}
 
 
-	remove("history.txt");
 	return 0;
 }
