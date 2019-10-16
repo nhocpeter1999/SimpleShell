@@ -101,7 +101,6 @@ redirecting rCommand(char toanTu, char* command)
 	}
 	else //Set quyen chi doc
 	{
-		remove(file);
 		tinhChatTapTin  = open(file, O_RDONLY | O_CREAT, S_IRWXU);
 	}
 	strcpy(ketQua.command,command);
