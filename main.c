@@ -8,8 +8,8 @@
 
 struct redirecting
 {
-	char command[MAXLINE];
-	int tinhChatTapTin; //
+	char command[MAXLINE]; // luu command line truoc khi redirecting
+	int tinhChatTapTin; //read only hay write only
 };
 typedef struct redirecting redirecting;
 
@@ -47,6 +47,7 @@ redirecting rCommand(char toanTu, char* command)
 	redirecting ketQua;
 	int tinhChatTapTin;
 	char dauToanTu;
+	// XAC DINH > HAY <
 	if (strstr(command, ">") != NULL)
 	{
 		dauToanTu = '>';
@@ -60,6 +61,8 @@ redirecting rCommand(char toanTu, char* command)
 	int viTri = 0;
 	char* lenhThucThi = (char*)malloc(MAXLINE);
 	char* tenFile = (char*)malloc(MAXLINE);
+	
+	//TACH LENH THUC THI VA DAU
 	for (i = 0; i < doDaiDongLenh; i++)
 	{
 		if (command[i] == dauToanTu) //lay tu dau den toan tu~
@@ -80,7 +83,7 @@ redirecting rCommand(char toanTu, char* command)
 		viTri++;
 	}
 
-	//================ COPY REDIRECT ===================
+	//COPY TEN FILE SAU > HAY <
 	int k = 0;
 	for (i = viTri; i < doDaiDongLenh; i++)
 	{
@@ -92,7 +95,7 @@ redirecting rCommand(char toanTu, char* command)
 	char* file = strdup(tenFile);
 	command = strdup(lenhThucThi);
 
-	//Mo file va lay tinh chat file
+	//Mo file va set tinh cahat file
 	if (dauToanTu == '>') //Set quyen chi ghi
 	{
 		//xoa file cu tao file moi
@@ -114,15 +117,20 @@ redirecting rCommand(char toanTu, char* command)
 
 int main()
 {
+	// PHAN CODE SAN CUA THAY
 	char* args[MAXLINE / 2 + 1]; /* command line arguments */
 	int shouldrun = 1; /* flag to determine when to exit program */
 	char* command = (char*)malloc(MAXLINE * sizeof(char));
+	
+	// CAU LENH LICH SU
 	char* cauLenhTruoc = (char*)malloc(MAXLINE * sizeof(char));
 	cauLenhTruoc = NULL;
 
+	// LENH TRONG PIPE
 	char* commandTruoc = NULL; //Tao chuoi de luu lenh trong pipe
 	char* commandSau = NULL;
 
+	// DUNG TRONG REDIRECTING
 	int huongRedirect = 0; /* 0. Khong co - 1. > - 2. <   */
 	int tinhChatTapTin = 1; //dung trong redirect
 
@@ -209,7 +217,7 @@ int main()
 			tinhChatTapTin = temp.tinhChatTapTin;
 		}
 
-		//======================= PIPE ============================
+		//======================= PIPE VA THUC HIEN LENH ============================
 
 		int kiemTraPipe = 0; //1 la co, 0 la khong
 
