@@ -32,7 +32,7 @@ int tachChuoi(char* command, char** daTach)
 void themKiTuKetThuc(char* chuoi)
 {
 	int doDai = strlen(chuoi);
-	while (chuoi[doDai - 1] == '\n' || chuoi[doDai -1] ==' ')
+	while (chuoi[doDai - 1] == '\n' || chuoi[doDai - 1] == ' ')
 	{
 		chuoi[doDai - 1] = '\0';
 	}
@@ -101,13 +101,15 @@ redirecting rCommand(char toanTu, char* command)
 	}
 	else //Set quyen chi doc
 	{
-		tinhChatTapTin  = open(file, O_RDONLY | O_CREAT, S_IRWXU);
+		tinhChatTapTin = open(file, O_RDONLY | O_CREAT, S_IRWXU);
 	}
-	strcpy(ketQua.command,command);
-    	ketQua.tinhChatTapTin = tinhChatTapTin;
-    	return ketQua;
+	strcpy(ketQua.command, command);
+	ketQua.tinhChatTapTin = tinhChatTapTin;
+	return ketQua;
 
 }
+
+
 
 
 int main()
@@ -124,8 +126,10 @@ int main()
 	int huongRedirect = 0; /* 0. Khong co - 1. > - 2. <   */
 	int tinhChatTapTin = 1; //dung trong redirect
 
+
 	while (shouldrun)
 	{
+		int lichSu = 0; //ktra neu xuat No commands in history
 		printf("osh> ");
 		fflush(stdin);
 		fflush(stdout);
@@ -139,20 +143,18 @@ int main()
 			if (cauLenhTruoc == NULL) //neu khong co cau lenh truoc
 			{
 				printf("No commands in history.\n");
-				cauLenhTruoc = strdup(command);
+				lichSu = 1;
 			}
 			else //neu co cau lenh truoc
 			{
-				command = cauLenhTruoc;
 				printf("%s\n", cauLenhTruoc);
+				command = strdup(cauLenhTruoc);
 			}
 		}
 		else //khong co yeu cau !! thi luu cau lenh
 		{
 			cauLenhTruoc = strdup(command);
 		}
-
-
 		// ====================== KIEM TRA XEM CO & KHONG ===========================
 		int kiemTra = 0;
 		if (strstr(command, "&") != NULL)
@@ -211,151 +213,155 @@ int main()
 
 		int kiemTraPipe = 0; //1 la co, 0 la khong
 
-		if (strstr(command, "|") != NULL) //co su dung pipe
+		if (lichSu == 0)
 		{
-			kiemTraPipe = 1;
-			commandTruoc = (char*)malloc(MAXLINE);
-			commandSau = (char*)malloc(MAXLINE);
-			int doDaiCmd = strlen(command);
-			int i = 0;
-			int viTri = 0;
-			for (i = 0; i < doDaiCmd; i++)
-			{
-				if (commandTruoc[i] == '|')
-				{
-					commandTruoc[i] = '\0';
-					viTri = i + 1;
-					break;
-				}
-				commandTruoc[i] = command[i];
-			}
-			while (command[viTri] == ' ')
-			{
-				viTri++;
-			}
-			int chayViTri = 0;
-			for (i = viTri; i < doDaiCmd; i++)
-			{
-				commandSau[chayViTri] = command[i];
-				chayViTri++;
-			}
-			commandSau[viTri] = '\0';
-		}
 
-		// ========= THOAT NEU NHAP EXIT KHONG THI TIEP TUC THUC HIEN LENH ===========
-
-		if (strcmp(command, "\0") == 0)
-		{
-			fflush(stdin);
-		}
-		if (strcmp(command, "exit") == 0)
-		{
-			shouldrun = 0;
-		}
-		else
-		{
-			int soChuoiDaTach = 0;
-			if (kiemTra == 1)
+			if (strstr(command, "|") != NULL) //co su dung pipe
 			{
-				soChuoiDaTach = tachChuoi(commandCopy, args);
-			}
-			else soChuoiDaTach = tachChuoi(command, args);
-			pid_t pidCon = fork();
-
-			if (pidCon == 0) //Neu dang la Process con
-			{
-				if (huongRedirect == 1) // theo huong >
+				kiemTraPipe = 1;
+				commandTruoc = (char*)malloc(MAXLINE);
+				commandSau = (char*)malloc(MAXLINE);
+				int doDaiCmd = strlen(command);
+				int i = 0;
+				int viTri = 0;
+				for (i = 0; i < doDaiCmd; i++)
 				{
-					dup2(tinhChatTapTin, 1);
-				}
-				else
-				{
-					if (huongRedirect == 2) // theo huong <
+					if (commandTruoc[i] == '|')
 					{
-						dup2(tinhChatTapTin, 0);
+						commandTruoc[i] = '\0';
+						viTri = i + 1;
+						break;
 					}
+					commandTruoc[i] = command[i];
 				}
-
-				if (kiemTraPipe == 1) //co pipe
+				while (command[viTri] == ' ')
 				{
-					int check[2]; //[0] la READ_END, [1] la WRITE_END
-					pipe(check); //pipe
-					pid_t pidChau = fork();
-					if (pidChau == 0) //process chau 1
-					{
-						dup2(check[1], 1); //doc output WRITE_END
-						close(check[0]);
-						close(check[1]);
-						tachChuoi(commandTruoc, args);
-						if (execvp(args[0], args) == -1)
-						{
-							printf("Error executing command!\n");
-							exit(0);
-						}
-						else exit(0);
+					viTri++;
+				}
+				int chayViTri = 0;
+				for (i = viTri; i < doDaiCmd; i++)
+				{
+					commandSau[chayViTri] = command[i];
+					chayViTri++;
+				}
+				commandSau[chayViTri] = '\0';
+			}
 
+			// ========= THOAT NEU NHAP EXIT KHONG THI TIEP TUC THUC HIEN LENH ===========
+
+			if (strcmp(command, "\0") == 0)
+			{
+				fflush(stdin);
+			}
+			if (strcmp(command, "exit") == 0)
+			{
+				shouldrun = 0;
+			}
+			else
+			{
+				int soChuoiDaTach = 0;
+				if (kiemTra == 1)
+				{
+					soChuoiDaTach = tachChuoi(commandCopy, args);
+				}
+				else soChuoiDaTach = tachChuoi(command, args);
+				pid_t pidCon = fork();
+
+				if (pidCon == 0) //Neu dang la Process con
+				{
+					if (huongRedirect == 1) // theo huong >
+					{
+						dup2(tinhChatTapTin, 1);
 					}
 					else
 					{
-						if (pidChau > 0) //process chau 2
+						if (huongRedirect == 2) // theo huong <
 						{
-							dup2(check[0], 0); //doc tu READ_END
+							dup2(tinhChatTapTin, 0);
+						}
+					}
+
+					if (kiemTraPipe == 1) //co pipe
+					{
+						int check[2]; //[0] la READ_END, [1] la WRITE_END
+						pipe(check); //pipe
+						pid_t pidChau = fork();
+						if (pidChau == 0) //process chau 1
+						{
+							dup2(check[1], 1); //doc output WRITE_END
 							close(check[0]);
 							close(check[1]);
-							tachChuoi(commandSau, args);
+							tachChuoi(commandTruoc, args);
 							if (execvp(args[0], args) == -1)
 							{
 								printf("Error executing command!\n");
 								exit(0);
 							}
 							else exit(0);
+
 						}
 						else
 						{
-							printf("Error executing pipe command!\n");
+							if (pidChau > 0) //process chau 2
+							{
+								dup2(check[0], 0); //doc tu READ_END
+								close(check[0]);
+								close(check[1]);
+								tachChuoi(commandSau, args);
+								if (execvp(args[0], args) == -1)
+								{
+									printf("Error executing command!\n");
+									exit(0);
+								}
+								else exit(0);
+							}
+							else
+							{
+								printf("Error executing pipe command!\n");
+							}
+							exit(0);
 						}
+					}
+
+					if (execvp(args[0], args) == -1)
+					{
+						printf("Error executing command!\n");
+						close(tinhChatTapTin);
 						exit(0);
 					}
-				}
-
-				if (execvp(args[0], args) == -1)
-				{
-					printf("Error executing command!\n");
-					close(tinhChatTapTin);
-					exit(0);
-				}
-				else
-				{
-					close(tinhChatTapTin);
-					exit(0);
-				}
-
-			}
-			else
-			{
-				if (pidCon > 0)
-				{
-					wait(NULL);
-					if (kiemTra == 1)
+					else
 					{
-
-						continue;
+						close(tinhChatTapTin);
+						exit(0);
 					}
-					else wait(&pidCon);
+
 				}
 				else
 				{
-					printf("Error creating process!\n");
-				}
+					if (pidCon > 0)
+					{
+						wait(NULL);
+						if (kiemTra == 1)
+						{
 
+							continue;
+						}
+						else wait(&pidCon);
+					}
+					else
+					{
+						printf("Error creating process!\n");
+					}
+
+
+				}
 			}
 		}
 	}
-
 	free(command);
-    	free(cauLenhTruoc);
+	free(cauLenhTruoc);
 	free(commandTruoc);
-    	free(commandSau);
-    	return EXIT_SUCCESS;
+	free(commandSau);
+	return 0;
 }
 
