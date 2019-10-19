@@ -32,7 +32,7 @@ int tachChuoi(char* command, char** daTach)
 void themKiTuKetThuc(char* chuoi)
 {
 	int doDai = strlen(chuoi);
-	while (chuoi[doDai - 1] == '\n' || chuoi[doDai - 1] == ' ')
+	if (chuoi[doDai - 1] == '\n' || chuoi[doDai - 1] == ' ')
 	{
 		chuoi[doDai - 1] = '\0';
 	}
