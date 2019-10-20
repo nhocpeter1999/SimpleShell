@@ -293,10 +293,10 @@ int main()
 					{
 						int check[2]; //[0] la READ_END, [1] la WRITE_END
 						pipe(check); //pipe
-						pid_t pidChau = fork();
+						pid_t pidChau = fork(); //tao fork cho process con
 						if (pidChau == 0) //process chau 1
 						{
-							dup2(check[1], 1); //doc output WRITE_END
+							dup2(check[1], 1); //truyen output WRITE_END
 							close(check[0]);
 							close(check[1]);
 							tachChuoi(commandTruoc, args);
